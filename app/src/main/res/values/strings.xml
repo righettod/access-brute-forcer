@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">SMB Access Brute Forcer</string>
+    <!-- List of available dictionaries -->
+    <string-array name="password_dictionaries">
+        <item>PhpBB</item>
+        <item>Hotmail</item>
+        <item>MySpace</item>
+        <item>Worst500Passwords</item>
+        <item>JohnTheRipper</item>
+        <item>CainAndAbel</item>
+        <item>Local...</item>
+    </string-array>
+    <!-- URL of the different dictionaries: Use for string name, the corresponding name from the list "password_dictionaries" above -->
+    <!-- Rockyou dico is too heavy for a device (more than 1M of passwords) -->
+    <string name="PhpBB">http://downloads.skullsecurity.org/passwords/phpbb.txt.bz2</string>
+    <string name="Hotmail">http://downloads.skullsecurity.org/passwords/hotmail.txt.bz2</string>
+    <string name="MySpace">http://downloads.skullsecurity.org/passwords/myspace.txt.bz2</string>
+    <string name="Worst500Passwords">http://downloads.skullsecurity.org/passwords/500-worst-passwords.txt.bz2</string>
+    <string name="JohnTheRipper">http://downloads.skullsecurity.org/passwords/john.txt.bz2</string>
+    <string name="CainAndAbel">http://downloads.skullsecurity.org/passwords/cain.txt.bz2</string>
+</resources>
