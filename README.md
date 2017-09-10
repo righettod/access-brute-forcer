@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/righettod/access-brute-forcer.svg)](https://travis-ci.org/righettod/access-brute-forcer)
+
 # SMB Access Brute Forcer
 
 Android v7+ application to perform a dictionary brute force attack against a host exposing SMB share(s).
