@@ -19,6 +19,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.UpdateManager;
+
 import org.apache.commons.compress.utils.IOUtils;
 
 import java.io.BufferedReader;
@@ -217,6 +220,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
             }
         });
+
+        checkForUpdates();
     }
 
     /**
@@ -290,6 +295,33 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
         this.selectedPasswordDictionaryFilePath = null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onResume() {
+        super.onResume();
+        checkForCrashes();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterManagers();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterManagers();
+    }
+
 
     /**
      * Load the content of a dictionary in a list of string
@@ -361,5 +393,28 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
             }
         }
     }
+
+    /**
+     * HockeyApp app management event handler
+     */
+    private void checkForCrashes() {
+        CrashManager.register(this);
+    }
+
+    /**
+     * HockeyApp app management event handler
+     */
+    private void checkForUpdates() {
+        // Remove this for store builds!
+        UpdateManager.register(this);
+    }
+
+    /**
+     * HockeyApp app management event handler
+     */
+    private void unregisterManagers() {
+        UpdateManager.unregister();
+    }
+
 
 }

@@ -10,6 +10,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders = [HOCKEYAPP_APP_ID: "64dd8a3981644cfd9923617dc0d05989"]
         jackOptions {
             enabled true
         }
@@ -36,5 +37,6 @@ dependencies {
     compile 'org.apache.commons:commons-compress:1.14'
     compile 'org.samba.jcifs:jcifs:1.3.3'
     compile 'com.android.support:support-core-utils:25.3.1'
+    compile 'net.hockeyapp.android:HockeySDK:5.0.0'
     testCompile 'junit:junit:4.12'
 }
