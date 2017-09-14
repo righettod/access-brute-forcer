@@ -6,6 +6,12 @@ def keystoreFileName = "keystore.properties"
 // Initialize the properties placeholders if the keystore information file exists
 if(rootProject.file(keystoreFileName).exists()){
     releaseSignKeystoreProperties.load(new FileInputStream(rootProject.file(keystoreFileName)))
+}else{
+    //Otherwise set dummy values to make the build file and context valid
+    releaseSignKeystoreProperties['keyAlias'] = "dummy"
+    keyPassword releaseSignKeystoreProperties['keyPassword'] = "dummy"
+    releaseSignKeystoreProperties['storeFile'] = "../dummy.jks"
+    releaseSignKeystoreProperties['storePassword'] = "dummy"
 }
 
 
