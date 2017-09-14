@@ -9,7 +9,7 @@ if(rootProject.file(keystoreFileName).exists()){
 }else{
     //Otherwise set dummy values to make the build file and context valid
     releaseSignKeystoreProperties['keyAlias'] = "dummy"
-    keyPassword releaseSignKeystoreProperties['keyPassword'] = "dummy"
+    releaseSignKeystoreProperties['keyPassword'] = "dummy"
     releaseSignKeystoreProperties['storeFile'] = "../dummy.jks"
     releaseSignKeystoreProperties['storePassword'] = "dummy"
 }
