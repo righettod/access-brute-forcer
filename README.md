@@ -13,13 +13,13 @@ This tool was developed in order to provide help in this case: During a reconnai
 
 The application allow to download and keep password dictionaries from predefined list of dictionaries or from the device itself (for tailored password dictionaries).
 
-# Release download
+# Download
 
 HockeyApp system is used to publish releases and track the applications crashes.
 
 Last release: https://rink.hockeyapp.net/apps/64dd8a3981644cfd9923617dc0d05989
 
-# Build Command Line
+# Build command line
 
 ## Debug version
 
@@ -48,7 +48,7 @@ storeFile=../release-keystore.jks
 3. Use the following command line `gradlew clean cleanBuildCache assembleRelease`
 4. APK is available in folder `[ROOT_FOLDER]/app/build/outputs/apk`
 
-# Combination
+# Usage efficiency
 
 The application should be combined with the following application to enhance efficiency:
 * [FING](https://play.google.com/store/apps/details?id=com.overlook.android.fing&hl=en): For WIFI network discovery and target identification,
