@@ -9,3 +9,7 @@ android:
     - android-25
 before_script: chmod +x gradlew
 script: ./gradlew clean cleanBuildCache assembleDebug
+addons:
+  coverity_scan:
+    notification_email: dominique.righetto@gmail.com
+    build_command: ./gradlew clean cleanBuildCache assembleDebug
