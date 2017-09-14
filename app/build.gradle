@@ -1,6 +1,22 @@
 apply plugin: 'com.android.application'
 
+// See https://developer.android.com/studio/publish/app-signing.html#secure-key
+// Create a variable and initialize it to the "keystore.properties" file in the rootProject folder that is not stored in the SCM (same remark for the keystore itself).
+def releaseSignKeystorePropertiesFile = rootProject.file("keystore.properties")
+// Initialize and load the keystore content
+def releaseSignKeystoreProperties = new Properties()
+releaseSignKeystoreProperties.load(new FileInputStream(releaseSignKeystorePropertiesFile))
+
+
 android {
+    signingConfigs {
+        releaseConfig {
+            keyAlias releaseSignKeystoreProperties['keyAlias']
+            keyPassword releaseSignKeystoreProperties['keyPassword']
+            storeFile file(releaseSignKeystoreProperties['storeFile'])
+            storePassword releaseSignKeystoreProperties['storePassword']
+        }
+    }
     compileSdkVersion 25
     buildToolsVersion "25.0.3"
     defaultConfig {
@@ -14,22 +30,28 @@ android {
         jackOptions {
             enabled true
         }
-
+        signingConfig signingConfigs.releaseConfig
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            debuggable false
+            signingConfig signingConfigs.releaseConfig
+            renderscriptDebuggable false
+            zipAlignEnabled true
         }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    productFlavors {
+    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })

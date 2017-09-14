@@ -8,3 +8,5 @@
 /app/build
 /captures
 .externalNativeBuild
+release-keystore.jks
+keystore.properties

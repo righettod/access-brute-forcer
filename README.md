@@ -5,7 +5,6 @@
 Android v7+ application to perform a dictionary brute force attack against a host exposing SMB share(s).
 
 The application is developed using Android Studio so you can import the project into it in order to compile a APK bundle.
-
 The application is still in development and testing.
 
 # Motivation
@@ -13,6 +12,41 @@ The application is still in development and testing.
 This tool was developed in order to provide help in this case: During a reconnaissance phase of an authorized penetration test at network level, when a open WIFI network was identified in which hosts are connected and exposes SMB shares (see port 445 opened), the goal is to perform a quick evaluation from a smartphone (more easy to launch and hide than a laptop) of the attack surface represented by theses share(s).
 
 The application allow to download and keep password dictionaries from predefined list of dictionaries or from the device itself (for tailored password dictionaries).
+
+# Release download
+
+HockeyApp system is used to publish releases and track the applications crashes.
+
+Last release: https://rink.hockeyapp.net/apps/64dd8a3981644cfd9923617dc0d05989
+
+# Build Command Line
+
+## Debug version
+
+Use the following command line `gradlew clean cleanBuildCache assembleDebug`
+
+## Release version
+
+Follow these steps:
+
+1. Create a [JKS keystore](https://stackoverflow.com/a/37488577) with a RSA keypair.
+2. Create a file named **keystore.properties** at the root folder level (same location than the file `gradlew`) with the following content:
+```
+storePassword=[StorePassword]
+keyPassword=[KeyPassword]
+keyAlias=[KeyAlias]
+storeFile=[Store file full location or relative location from app sub folder]
+```
+Example:
+```
+# Configuration of the keystore used to sign the released APK
+storePassword=fB5YDpcvTvQH7Sg399xG49YFK
+keyPassword=gHTaEq93Xe93c3rWJu8v33WVB
+keyAlias=keys
+storeFile=../release-keystore.jks
+```
+3. Use the following command line `gradlew clean cleanBuildCache assembleRelease`
+4. APK is available in folder `[ROOT_FOLDER]/app/build/outputs/apk`
 
 # Combination
 
