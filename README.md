@@ -17,7 +17,9 @@ The application allow to download and keep password dictionaries from predefined
 
 HockeyApp system is used to publish releases and track the applications crashes.
 
-Last release: https://rink.hockeyapp.net/apps/64dd8a3981644cfd9923617dc0d05989
+Last release:
+* [APK file](https://rink.hockeyapp.net/apps/64dd8a3981644cfd9923617dc0d05989)
+* [VirusTotal APK file analysis]( https://www.virustotal.com/#/file/4ea2b70bd74653c4db7f9c670afaf75d20a58a9a68d40740795073149948578d/detection) 
 
 # Build command line
 
