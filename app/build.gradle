@@ -1,11 +1,13 @@
 apply plugin: 'com.android.application'
 
 // See https://developer.android.com/studio/publish/app-signing.html#secure-key
-// Create a variable and initialize it to the "keystore.properties" file in the rootProject folder that is not stored in the SCM (same remark for the keystore itself).
-def releaseSignKeystorePropertiesFile = rootProject.file("keystore.properties")
-// Initialize and load the keystore content
 def releaseSignKeystoreProperties = new Properties()
-releaseSignKeystoreProperties.load(new FileInputStream(releaseSignKeystorePropertiesFile))
+def keystoreFileName = "keystore.properties"
+// Initialize the properties placeholders if the keystore information file exists
+if(rootProject.file(keystoreFileName).exists()){
+    releaseSignKeystoreProperties.load(new FileInputStream(rootProject.file(keystoreFileName)))
+}
+
 
 
 android {
