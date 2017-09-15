@@ -117,7 +117,9 @@
             android:layout_height="wrap_content"
             android:layout_row="5"
             android:layout_column="0"
-            android:lines="4"
+            android:lines="20"
+            android:maxLines="100"
+            android:scrollbars="vertical"
             android:layout_columnSpan="2"
             android:text="" />
 

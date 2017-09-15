@@ -3,6 +3,8 @@ package righettod.eu.smbaccessbf;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DownloadManager;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -11,6 +13,8 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.method.ScrollingMovementMethod;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -221,6 +225,23 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
             }
         });
 
+        //Handle action to copy result on clipboard when result text view is pressed
+        final TextView resultTextView = (TextView) findViewById(R.id.textResult);
+        resultTextView.setMovementMethod(new ScrollingMovementMethod());
+        resultTextView.setOnTouchListener(new View.OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                    ClipData clip = ClipData.newPlainText("BF Result", resultTextView.getText());
+                    clipboard.setPrimaryClip(clip);
+                    Toast toast = Toast.makeText(getApplicationContext(), "Brute force result copied into clipboard !", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+                return false;
+            }
+        });
+
+        //HockeyApp crash handler
         checkForUpdates();
     }
 
@@ -301,6 +322,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     @Override
     public void onResume() {
         super.onResume();
+        //HockeyApp crash handler
         checkForCrashes();
     }
 
@@ -310,6 +332,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     @Override
     public void onPause() {
         super.onPause();
+        //HockeyApp crash handler
         unregisterManagers();
     }
 
@@ -319,6 +342,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     @Override
     public void onDestroy() {
         super.onDestroy();
+        //HockeyApp crash handler
         unregisterManagers();
     }
 
