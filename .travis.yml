@@ -9,11 +9,3 @@ android:
     - android-25
 before_script: chmod +x gradlew
 script: ./gradlew clean cleanBuildCache assembleDebug
-addons:
-  coverity_scan:
-    project:
-      name: "righettod/access-brute-forcer"
-      description: "Trigger via TravisCI"
-    notification_email: dominique.righetto@gmail.com
-    build_command: ./gradlew clean cleanBuildCache assembleDebug
-    branch_pattern: master
