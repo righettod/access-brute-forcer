@@ -1,4 +1,4 @@
-package righettod.eu.smbaccessbf;
+package righettod.eu.accessbf;
 
 import android.app.IntentService;
 import android.content.ContentResolver;

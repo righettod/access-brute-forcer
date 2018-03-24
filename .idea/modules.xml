@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SmbAccessBF.iml" filepath="$PROJECT_DIR$/SmbAccessBF.iml" />
+      <module fileurl="file://$PROJECT_DIR$/access-brute-forcer.iml" filepath="$PROJECT_DIR$/access-brute-forcer.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

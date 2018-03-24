@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SMB Access Brute Forcer</string>
+    <string name="app_name">Access Brute Forcer</string>
     <!-- List of available dictionaries -->
     <string-array name="password_dictionaries">
         <item>PhpBB</item>

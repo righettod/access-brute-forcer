@@ -1,15 +1,19 @@
 [![Build Status](https://travis-ci.org/righettod/access-brute-forcer.svg)](https://travis-ci.org/righettod/access-brute-forcer)
 
-# SMB Access Brute Forcer
+# Access Brute Forcer
 
-Android v7+ application to perform a dictionary brute force attack against a host exposing SMB share(s).
+Android v7+ application to perform a dictionary brute force attack against a host exposing:
+* SMB Windows shares.
+* FTP server.
+* SSH access.
 
 The application is developed using Android Studio so you can import the project into it in order to compile a APK bundle.
-The application is still in development and testing.
 
 # Motivation
 
-This tool was developed in order to provide help in this case: During a reconnaissance phase of an authorized penetration test at network level, when a open WIFI network was identified in which hosts are connected and exposes SMB shares (see port 445 opened), the goal is to perform a quick evaluation from a smartphone (more easy to launch and hide than a laptop) of the attack surface represented by theses share(s).
+This tool was developed in order to provide help in this case:
+
+During a reconnaissance phase of an authorized penetration test at network level, when a open WIFI network was identified in which hosts are connected and exposes SMB Windows shares (see port 445 opened) / FTP server / SSH access, the goal is to perform a quick evaluation from a smartphone (more easy to launch and hide than a laptop) of the attack surface represented by theses points.
 
 The application allow to download and keep password dictionaries from predefined list of dictionaries or from the device itself (for tailored password dictionaries).
 
@@ -19,7 +23,7 @@ HockeyApp system is used to publish releases and track the applications crashes.
 
 Last release:
 * [APK file](https://rink.hockeyapp.net/apps/64dd8a3981644cfd9923617dc0d05989)
-* [VirusTotal APK file analysis]( https://www.virustotal.com/#/file/4ea2b70bd74653c4db7f9c670afaf75d20a58a9a68d40740795073149948578d/detection) 
+* [VirusTotal APK file analysis](https://www.virustotal.com/#/file/6ff09f75a4642ebcb50d0b16bba3964168345009718cb8a53f8573173de72a65/detection)
 
 # Build command line
 
@@ -52,20 +56,17 @@ storeFile=../release-keystore.jks
 
 # Usage efficiency
 
-The application should be combined with the following application to enhance efficiency:
+The application should be combined with the following applications to enhance efficiency:
 * [FING](https://play.google.com/store/apps/details?id=com.overlook.android.fing&hl=en): For WIFI network discovery and target identification,
-* [FILE MANAGER](https://play.google.com/store/apps/details?id=com.alphainventor.filemanager&hl=en): To access to shares content after the credentials identification.
+* [FILE MANAGER](https://play.google.com/store/apps/details?id=com.alphainventor.filemanager&hl=en): To access to Windows SMB Shares, FTP, SSH (via SFTP) content after the credentials identification.
+* [JUICE SSH](https://play.google.com/store/apps/details?id=com.sonelli.juicessh&hl=en): To access via SSH shell if SFTP is not enabled.
 
 # Action flow
 
-1. Use **Fing** to identify a target host (copy the host IP in the clipboard),
+1. Use **Fing** to identify a target host (copy the host IP or name in the clipboard via **Fing** copy/paste feature).
 
-2. Use the app to identify the credentials (paste the host IP  from the clipboard into the **Target** field),
+2. Use the app to identify the credentials (paste the host IP or name from the clipboard into the **Target** field). Port is optional, if not specified then default one is used.
 
 ![Main screen](example.png)
 
-3. Use **File Manager** to access the share contents.
-
-# TODO
-
-* Extend brute force to SSH, Telnet and FTP protocols.
+3. Use **File Manager** or **Juice SSH** to access to the contents.

@@ -1,4 +1,4 @@
-package righettod.eu.smbaccessbf;
+package righettod.eu.accessbf;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -16,9 +16,11 @@ import android.os.Environment;
 import android.text.method.ScrollingMovementMethod;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,11 +44,12 @@ import java.util.List;
  */
 public class MainActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
-    public static final String LOG_TAG = "SMBACCESSBF";
+    public static final String LOG_TAG = "ACCESSBF";
     private static final int READ_DOCUMENT_REQUEST_CODE = 1;
     private String selectedPasswordDictionary = null;
     private File selectedPasswordDictionaryFilePath = null;
     private File dictionariesStorageFolder = null;
+    private Protocol selectedProtocol = Protocol.SSH;
     private final List<AsyncTask<Object, Integer[], List<String>>> credentialProbingTaskList = new ArrayList<>();
 
     /**
@@ -56,30 +59,26 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
 
         //Check if WIFI is enabled => Mandatory
         WifiManager wifi = (WifiManager) getSystemService(WIFI_SERVICE);
         if (!wifi.isWifiEnabled()) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("WIFI is not enabled, application will be closed !").setTitle("Warning").setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    MainActivity.this.finish();
-                }
-            });
+            builder.setMessage("WIFI is not enabled, application will be closed !").setTitle("Warning").setPositiveButton("OK", (DialogInterface dialog, int id) -> {
+                        MainActivity.this.finish();
+                    }
+            );
             AlertDialog dialog = builder.create();
             dialog.show();
         }
 
         //Ensure that the user have the authorization of the network owner before to use the application
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setMessage("Do you have an explicit authorization of the network owner to perform this brute force operation ?").setTitle("Legal Warning").setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-            }
-        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-                MainActivity.this.finish();
-            }
-        });
+        builder.setMessage("Do you have an explicit authorization of the network owner to perform this brute force operation ?").setTitle("Legal Warning").setPositiveButton("Yes", (DialogInterface dialog, int id) -> {
+                }
+        ).setNegativeButton("No", (DialogInterface dialog, int id) -> MainActivity.this.finish());
         AlertDialog dialog = builder.create();
         dialog.show();
 
@@ -106,88 +105,92 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
         //Add dictionary download button event handler
         final Button buttonDownloadDico = (Button) findViewById(R.id.buttonDownloadDico);
-        buttonDownloadDico.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                //Retrieve the dico download URL from string resources if it is not a LocalCustom dico
-                if ("Local...".equalsIgnoreCase(MainActivity.this.selectedPasswordDictionary)) {
-                    //See https://developer.android.com/guide/topics/providers/document-provider.html
-                    Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                    // Filter to only show results that can be "opened", such as a file (as opposed to a list of contacts or timezones)
-                    intent.addCategory(Intent.CATEGORY_OPENABLE);
-                    //Want only data available on device and select only one item
-                    intent.putExtra(Intent.EXTRA_LOCAL_ONLY, true);
-                    intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
-                    // Filter to show only text files, using the text MIME data type.
-                    intent.setType("text/*");
-                    startActivityForResult(intent, READ_DOCUMENT_REQUEST_CODE);
-                } else {
-                    //Retrieve the URL
-                    int id = MainActivity.this.getResources().getIdentifier(MainActivity.this.selectedPasswordDictionary, "string", MainActivity.this.getPackageName());
-                    String dicoUrl = MainActivity.this.getResources().getString(id);
-                    Uri dicoUri = Uri.parse(dicoUrl);
-                    //Initiate the download of the file to the external storage through the Android Download Manager
-                    // Create request for android download manager
-                    DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
-                    DownloadManager.Request request = new DownloadManager.Request(dicoUri);
-                    //Set the local destination for the downloaded file to a path within the application's external files directory (will be moved after download)
-                    String fileName = dicoUrl.substring(dicoUrl.lastIndexOf('/') + 1, dicoUrl.length());
-                    String fileNameExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
-                    fileName = MainActivity.this.selectedPasswordDictionary + "." + fileNameExtension;
-                    request.setDestinationInExternalFilesDir(MainActivity.this, Environment.DIRECTORY_DOWNLOADS, fileName);
-                    //Setting title of request
-                    String msg = "Download and process dico named '" + fileName + "'";
-                    request.setTitle(msg);
-                    //Enqueue download and save into a reference identifier
-                    long currentDicoDownloadReference = downloadManager.enqueue(request);
-                    //Start dedicated receiver
-                    IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-                    File targetFilePath = new File(MainActivity.this.dictionariesStorageFolder, MainActivity.this.derivateDicoFilename(fileName));
-                    DownloadReceiver downloadReceiver = new DownloadReceiver(currentDicoDownloadReference, targetFilePath.getAbsolutePath());
-                    registerReceiver(downloadReceiver, filter);
+        buttonDownloadDico.setOnClickListener((View v) -> {
+                    //Retrieve the dico download URL from string resources if it is not a LocalCustom dico
+                    if ("Local...".equalsIgnoreCase(MainActivity.this.selectedPasswordDictionary)) {
+                        //See https://developer.android.com/guide/topics/providers/document-provider.html
+                        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                        // Filter to only show results that can be "opened", such as a file (as opposed to a list of contacts or timezones)
+                        intent.addCategory(Intent.CATEGORY_OPENABLE);
+                        //Want only data available on device and select only one item
+                        intent.putExtra(Intent.EXTRA_LOCAL_ONLY, false);
+                        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false);
+                        // Filter to show only text files, using the text MIME data type.
+                        intent.setType("text/*");
+                        startActivityForResult(intent, READ_DOCUMENT_REQUEST_CODE);
+                    } else {
+                        //Retrieve the URL
+                        int id = MainActivity.this.getResources().getIdentifier(MainActivity.this.selectedPasswordDictionary, "string", MainActivity.this.getPackageName());
+                        String dicoUrl = MainActivity.this.getResources().getString(id);
+                        Uri dicoUri = Uri.parse(dicoUrl);
+                        //Initiate the download of the file to the external storage through the Android Download Manager
+                        // Create request for android download manager
+                        DownloadManager downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+                        DownloadManager.Request request = new DownloadManager.Request(dicoUri);
+                        //Set the local destination for the downloaded file to a path within the application's external files directory (will be moved after download)
+                        String fileName = dicoUrl.substring(dicoUrl.lastIndexOf('/') + 1, dicoUrl.length());
+                        String fileNameExtension = fileName.substring(fileName.lastIndexOf('.') + 1);
+                        fileName = MainActivity.this.selectedPasswordDictionary + "." + fileNameExtension;
+                        request.setDestinationInExternalFilesDir(MainActivity.this, Environment.DIRECTORY_DOWNLOADS, fileName);
+                        //Setting title of request
+                        String msg = "Download and process dico named '" + fileName + "'";
+                        request.setTitle(msg);
+                        //Enqueue download and save into a reference identifier
+                        long currentDicoDownloadReference = downloadManager.enqueue(request);
+                        //Start dedicated receiver
+                        IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+                        File targetFilePath = new File(MainActivity.this.dictionariesStorageFolder, MainActivity.this.derivateDicoFilename(fileName));
+                        DownloadReceiver downloadReceiver = new DownloadReceiver(currentDicoDownloadReference, targetFilePath.getAbsolutePath());
+                        registerReceiver(downloadReceiver, filter);
+                    }
                 }
-            }
-        });
+        );
 
         //Add stop BF button event handler
         final Button buttonStop = (Button) findViewById(R.id.buttonStop);
-        buttonStop.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                try {
-                    //Lock IU action components
-                    findViewById(R.id.buttonStart).setEnabled(false);
-                    findViewById(R.id.buttonStop).setEnabled(false);
-                    findViewById(R.id.buttonDownloadDico).setEnabled(false);
-                    findViewById(R.id.dicoSpinner).setEnabled(false);
-                    findViewById(R.id.editIPPort).setEnabled(false);
-                    findViewById(R.id.editUsername).setEnabled(false);
-                    //Cancel all tasks
-                    int cancelledTaskCount = 0;
-                    if (!MainActivity.this.credentialProbingTaskList.isEmpty()) {
-                        for (AsyncTask t : MainActivity.this.credentialProbingTaskList) {
-                            if (t.getStatus() != AsyncTask.Status.FINISHED && !t.isCancelled()) {
-                                t.cancel(true);
-                                cancelledTaskCount++;
+        buttonStop.setOnClickListener((View v) -> {
+                    try {
+                        //Lock IU action components
+                        findViewById(R.id.buttonStart).setEnabled(false);
+                        findViewById(R.id.buttonStop).setEnabled(false);
+                        findViewById(R.id.buttonDownloadDico).setEnabled(false);
+                        findViewById(R.id.dicoSpinner).setEnabled(false);
+                        findViewById(R.id.editIPPort).setEnabled(false);
+                        findViewById(R.id.editUsername).setEnabled(false);
+                        findViewById(R.id.bf_ssh).setEnabled(false);
+                        findViewById(R.id.bf_smb).setEnabled(false);
+                        findViewById(R.id.bf_ftp).setEnabled(false);
+
+                        //Cancel all tasks
+                        int cancelledTaskCount = 0;
+                        if (!MainActivity.this.credentialProbingTaskList.isEmpty()) {
+                            for (AsyncTask t : MainActivity.this.credentialProbingTaskList) {
+                                if (t.getStatus() != AsyncTask.Status.FINISHED && !t.isCancelled()) {
+                                    t.cancel(true);
+                                    cancelledTaskCount++;
+                                }
                             }
                         }
+                        TextView textProgressInfo = (TextView) findViewById(R.id.textProgressInfo);
+                        textProgressInfo.setText(cancelledTaskCount + " task(s) cancelled");
+                    } finally {
+                        //Unlock IU action components
+                        findViewById(R.id.buttonStart).setEnabled(true);
+                        findViewById(R.id.buttonStop).setEnabled(true);
+                        findViewById(R.id.buttonDownloadDico).setEnabled(true);
+                        findViewById(R.id.dicoSpinner).setEnabled(true);
+                        findViewById(R.id.editIPPort).setEnabled(true);
+                        findViewById(R.id.editUsername).setEnabled(true);
+                        findViewById(R.id.bf_ssh).setEnabled(true);
+                        findViewById(R.id.bf_smb).setEnabled(true);
+                        findViewById(R.id.bf_ftp).setEnabled(true);
                     }
-                    TextView textProgressInfo = (TextView) findViewById(R.id.textProgressInfo);
-                    textProgressInfo.setText(cancelledTaskCount + " task(s) cancelled");
-                } finally {
-                    //Unlock IU action components
-                    findViewById(R.id.buttonStart).setEnabled(true);
-                    findViewById(R.id.buttonStop).setEnabled(true);
-                    findViewById(R.id.buttonDownloadDico).setEnabled(true);
-                    findViewById(R.id.dicoSpinner).setEnabled(true);
-                    findViewById(R.id.editIPPort).setEnabled(true);
-                    findViewById(R.id.editUsername).setEnabled(true);
                 }
-            }
-        });
+        );
 
         //Add start BF button event handler
         final Button buttonStart = (Button) findViewById(R.id.buttonStart);
-        buttonStart.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
+        buttonStart.setOnClickListener((View v) ->{
                 try {
                     //Check that a password dictionary is selected
                     if (MainActivity.this.selectedPasswordDictionaryFilePath == null || !MainActivity.this.selectedPasswordDictionaryFilePath.exists()) {
@@ -213,7 +216,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
                     //Create and launch tasks
                     TextView textProgressInfo = (TextView) findViewById(R.id.textProgressInfo);
                     TextView textResult = (TextView) findViewById(R.id.textResult);
-                    CredentialProbingTask task = new CredentialProbingTask(textProgressInfo, textResult, findViewById(R.id.dicoSpinner), findViewById(R.id.buttonDownloadDico), findViewById(R.id.buttonStart), findViewById(R.id.editIPPort), findViewById(R.id.editUsername));
+                    CredentialProbingTask task = new CredentialProbingTask(MainActivity.this.selectedProtocol, textProgressInfo, textResult, findViewById(R.id.dicoSpinner), findViewById(R.id.buttonDownloadDico), findViewById(R.id.buttonStart), findViewById(R.id.editIPPort), findViewById(R.id.editUsername), findViewById(R.id.bf_ftp), findViewById(R.id.bf_smb), findViewById(R.id.bf_ssh));
                     Object[] params = new Object[]{target.toString(), login.toString(), dictionaryEntries};
                     MainActivity.this.credentialProbingTaskList.clear();
                     MainActivity.this.credentialProbingTaskList.add(task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params));
@@ -223,13 +226,12 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
                 }
 
             }
-        });
+        );
 
         //Handle action to copy result on clipboard when result text view is pressed
         final TextView resultTextView = (TextView) findViewById(R.id.textResult);
         resultTextView.setMovementMethod(new ScrollingMovementMethod());
-        resultTextView.setOnTouchListener(new View.OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
+        resultTextView.setOnTouchListener((View v, MotionEvent event) ->{
                 if (event.getAction() == MotionEvent.ACTION_UP) {
                     ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
                     ClipData clip = ClipData.newPlainText("BF Result", resultTextView.getText());
@@ -239,10 +241,39 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
                 }
                 return false;
             }
-        });
+        );
 
         //HockeyApp crash handler
         checkForUpdates();
+    }
+
+    /**
+     * Handle the click on the radio button used to select to protocol to the target
+     *
+     * @param view View representing the radio button
+     */
+    public void onProtocolRadioButtonClicked(View view) {
+        // Get a reference on the radio button clicked
+        boolean checked = ((RadioButton) view).isChecked();
+
+        // Check which radio button was clicked
+        switch (view.getId()) {
+            case R.id.bf_ftp:
+                if (checked) {
+                    this.selectedProtocol = Protocol.FTP;
+                }
+                break;
+            case R.id.bf_smb:
+                if (checked) {
+                    this.selectedProtocol = Protocol.SMB;
+                }
+                break;
+            case R.id.bf_ssh:
+                if (checked) {
+                    this.selectedProtocol = Protocol.SSH;
+                }
+                break;
+        }
     }
 
     /**
@@ -259,7 +290,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
                 TextView textProgressInfo = (TextView) findViewById(R.id.textProgressInfo);
                 try {
                     this.copyFile(resultData.getData(), this.selectedPasswordDictionaryFilePath);
-                    textProgressInfo.setText("Dict loaded (" + this.loadDictionary(this.selectedPasswordDictionaryFilePath).size() + " passwords)");
+                    textProgressInfo.setText("Dictionary loaded (" + this.loadDictionary(this.selectedPasswordDictionaryFilePath).size() + " passwords)");
                     findViewById(R.id.buttonStart).setEnabled(true);
                     findViewById(R.id.buttonStop).setEnabled(true);
                 } catch (IOException ioe) {

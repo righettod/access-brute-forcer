@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="righettod.eu.smbaccessbf">
+          package="righettod.eu.accessbf">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
@@ -13,7 +15,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity" android:screenOrientation="portrait">
+        <activity android:name="righettod.eu.accessbf.MainActivity" android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -22,13 +24,13 @@
         </activity>
 
         <receiver
-            android:name=".DownloadReceiver"
+            android:name="righettod.eu.accessbf.DownloadReceiver"
             android:enabled="true"
             android:exported="false">
         </receiver>
 
         <service
-            android:name=".PostDownloadService"
+            android:name="righettod.eu.accessbf.PostDownloadService"
             android:enabled="true"
             android:exported="false">
         </service>

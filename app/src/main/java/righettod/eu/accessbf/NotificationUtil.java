@@ -1,4 +1,4 @@
-package righettod.eu.smbaccessbf;
+package righettod.eu.accessbf;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -19,7 +19,7 @@ class NotificationUtil {
      * @param context Context
      * @param content Notification content
      */
-    public static void sendNotification(Context context, String content) {
+    static void sendNotification(Context context, String content) {
         NotificationManager mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context.getApplicationContext()).setContentText(content).setSmallIcon(R.drawable.ic_stat_info_outline);
         mNotificationManager.notify(1, mBuilder.build());
@@ -32,12 +32,11 @@ class NotificationUtil {
      * @param content  Message content
      * @param title    Message dialog
      */
-    public static void showMessageDialog(Activity activity, String content, String title) {
+    static void showMessageDialog(Activity activity, String content, String title) {
         AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-        builder.setMessage(content).setTitle(title).setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int id) {
-            }
-        });
+        builder.setMessage(content).setTitle(title).setPositiveButton("OK", (DialogInterface dialog, int id) -> {
+                }
+        );
         AlertDialog dialog = builder.create();
         dialog.show();
     }

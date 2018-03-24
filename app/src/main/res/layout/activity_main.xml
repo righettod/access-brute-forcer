@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="righettod.eu.smbaccessbf.MainActivity">
+    tools:context="righettod.eu.accessbf.MainActivity">
 
     <GridLayout
         android:layout_width="match_parent"
@@ -12,7 +12,7 @@
         android:paddingLeft="10px"
         android:paddingRight="10px"
         android:columnCount="2"
-        android:rowCount="6"
+        android:rowCount="7"
         tools:layout_editor_absoluteY="8dp"
         tools:layout_editor_absoluteX="8dp">
 
@@ -33,7 +33,7 @@
             android:layout_row="0"
             android:layout_column="1"
             android:inputType="textPersonName"
-            android:text="[host]:[port]" />
+            android:text="[Host]:[Post]" />
 
         <TextView
             android:id="@+id/textView5"
@@ -71,12 +71,37 @@
             android:layout_column="1"
             />
 
+        <RadioGroup xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_columnSpan="2"
+            android:layout_row="3"
+            android:layout_column="0"
+            android:checkedButton="@+id/bf_ftp"
+            android:orientation="horizontal">
+            <RadioButton android:id="@+id/bf_ftp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FTP"
+                android:onClick="onProtocolRadioButtonClicked"/>
+            <RadioButton android:id="@+id/bf_ssh"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SSH"
+                android:onClick="onProtocolRadioButtonClicked"/>
+            <RadioButton android:id="@+id/bf_smb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SMB Windows share"
+                android:onClick="onProtocolRadioButtonClicked"/>
+        </RadioGroup>
+
 
         <TextView
             android:id="@+id/textProgressInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_row="3"
+            android:layout_row="4"
             android:layout_column="0"
             android:layout_columnSpan="2"
             android:text="Progress information" />
@@ -84,7 +109,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_row="4"
+            android:layout_row="5"
             android:layout_column="0"
             android:layout_columnSpan="2"
             android:orientation="horizontal">
@@ -115,7 +140,7 @@
             android:id="@+id/textResult"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_row="5"
+            android:layout_row="6"
             android:layout_column="0"
             android:lines="20"
             android:maxLines="100"

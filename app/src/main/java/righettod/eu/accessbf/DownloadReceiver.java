@@ -1,4 +1,4 @@
-package righettod.eu.smbaccessbf;
+package righettod.eu.accessbf;
 
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;

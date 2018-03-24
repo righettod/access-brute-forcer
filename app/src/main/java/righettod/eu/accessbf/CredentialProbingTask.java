@@ -1,21 +1,18 @@
-package righettod.eu.smbaccessbf;
+package righettod.eu.accessbf;
 
 
+import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Vibrator;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import jcifs.smb.NtlmPasswordAuthentication;
-import jcifs.smb.SmbException;
-import jcifs.smb.SmbFile;
 
 
 /**
@@ -24,25 +21,36 @@ import jcifs.smb.SmbFile;
 class CredentialProbingTask extends AsyncTask<Object, Integer[], List<String>> {
 
     /**
-     * UI component to update
+     * UI component to update for the progression
      */
     private TextView textProgressInfo = null;
+
+    /**
+     * UI component to update for the result
+     */
     private TextView textResult = null;
+
+    /**
+     * UI component to update
+     */
     private View[] actionViews = null;
+
+
+    /**Protocol Protocol to use for the credential probing*/
+    private Protocol protocol = null;
 
     /**
      * Constructor
-     *
+     * @param protocol Protocol to use for the credential probing
      * @param textProgressInfo UI component to update to provide text feedback
      * @param textResult       UI component to update to provide text feedback about result
      * @param actionViews      List of action view to disable and re-enable during and after the processing
      */
-    public CredentialProbingTask(TextView textProgressInfo, TextView textResult, View... actionViews) {
+    public CredentialProbingTask(Protocol protocol, TextView textProgressInfo, TextView textResult, View... actionViews) {
+        this.protocol = protocol;
         this.textProgressInfo = textProgressInfo;
         this.actionViews = actionViews;
         this.textResult = textResult;
-        System.setProperty("jcifs.smb.client.responseTimeout", "5000"); // default: 30000 ms
-        System.setProperty("jcifs.smb.client.soTimeout", "5000"); // default: 35000 mss
     }
 
     /**
@@ -61,42 +69,50 @@ class CredentialProbingTask extends AsyncTask<Object, Integer[], List<String>> {
      */
     @Override
     protected List<String> doInBackground(Object... params) {
-        List<String> validCreds = Collections.synchronizedList(new ArrayList<String>());
+        CopyOnWriteArrayList<String> validCreds = new CopyOnWriteArrayList<>();
         try {
             //Get execution parameters
-            String target = (String) params[0];
-            String login = (String) params[1];
-            List<String> passwords = (List<String>) params[2];
-            int passwordsCount = passwords.size();
+            final String target = (String) params[0];
+            final String login = (String) params[1];
+            final List<String> passwords = (List<String>) params[2];
 
-            //Detect if a domain is specified in the login
-            String domain = ".";// . mean target machine and not a domain
-            if (login.contains("\\")) {
-                String[] part = login.split("\\\\");
-                domain = part[0].trim();
-                login = part[1].trim();
-            }
-            final String loginToUse = login;
-            final String domainToUse = domain;
 
-            //Add the empty password to the list
+            //Add empty password and login variations
             passwords.add("");
             passwords.add(" ");
+            passwords.add(login);
+            passwords.add(login.toUpperCase());
+            passwords.add(login.toLowerCase());
 
             //Test the password list
+            int passwordsCount = passwords.size();
+            final ProtocolUtil protocolUtil = new ProtocolUtil(target,login);
             final CopyOnWriteArrayList<Integer> tryCountHolder = new CopyOnWriteArrayList<>();
             tryCountHolder.add(0);
             passwords.parallelStream().forEach(password -> {
                 try {
-                    //Test the credentials against the target
-                    //String pwdUrlEncoded = password.replace("%", "%25").replace("@", "%40").replace(":", "%3A").replace("#", "%23");
-                    String url = "smb://" + target + "/";
-                    NtlmPasswordAuthentication auth = new NtlmPasswordAuthentication(domainToUse, loginToUse, password);
-                    SmbFile testFile = new SmbFile(url, auth);
-                    if (testFile != null && testFile.list().length > 0) {
-                        validCreds.add("[" + loginToUse + "] &rArr; [" + password + "]");
+                    //Apply effective probing only if password has not already been found and task has not been cancelled
+                    if(validCreds.isEmpty() && !this.isCancelled()){
+                        boolean isValidPassword;
+                        switch(this.protocol){
+                            case SMB:
+                                isValidPassword = protocolUtil.isValidPasswordForSMB(password);
+                                break;
+                            case SSH:
+                                isValidPassword = protocolUtil.isValidPasswordForSSH(password);
+                                break;
+                            case FTP:
+                                isValidPassword = protocolUtil.isValidPasswordForFTP(password);
+                                break;
+                            default:
+                                isValidPassword = false;
+                                break;
+                        }
+                        if (isValidPassword) {
+                            validCreds.add("<br><strong>Host</strong> &rArr; " + target + "<br><strong>Protocol</strong> &rArr; " + protocol + "<br><strong>Login</strong> &rArr; [" + login + "]<br><strong>Password</strong> &rArr; [" + password + "]");
+                        }
                     }
-                } catch (SmbException | MalformedURLException exp) {
+                } catch (Exception ignore) {
                     //Explicitly ignore this exception because it's a brute force here...
                 } finally {
                     int counter = tryCountHolder.get(0) + 1;
@@ -135,11 +151,15 @@ class CredentialProbingTask extends AsyncTask<Object, Integer[], List<String>> {
         String msgInfo;
         if (result != null && !result.isEmpty()) {
             //Display that we have found a valid credential combination
-            msgInfo = "<font color='#06a01f'>Found valid credential, check out below between square brackets !</font>";
+            msgInfo = "<font color='#06a01f'>Found valid credential, check out below between square brackets. Hold and release the zone to copy credential data into clipboard.</font>";
             //Render the list of credentials found
             StringBuilder buffer = new StringBuilder();
             result.forEach(r -> buffer.append(r).append("<br>"));
             this.textResult.setText(Html.fromHtml(buffer.toString(), Html.FROM_HTML_MODE_LEGACY));
+            //Notify via vibration and top bar notification that credentials has been found
+            NotificationUtil.sendNotification(this.textResult.getContext(), "Found valid credential !");
+            Vibrator v = (Vibrator) this.textResult.getContext().getSystemService(Context.VIBRATOR_SERVICE);
+            v.vibrate(2000);
         } else {
             msgInfo = "<font color='red'>No valid credential found !</font>";
             this.textResult.setText("");

@@ -26,23 +26,20 @@ android {
         }
     }
     compileSdkVersion 25
-    buildToolsVersion "25.0.3"
     defaultConfig {
-        applicationId "righettod.eu.smbaccessbf"
+        applicationId "righettod.eu.accessbf"
         minSdkVersion 24
         targetSdkVersion 25
         versionCode 1
-        versionName "1.0"
+        versionName "1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [HOCKEYAPP_APP_ID: "64dd8a3981644cfd9923617dc0d05989"]
-        jackOptions {
-            enabled true
-        }
         signingConfig signingConfigs.releaseConfig
     }
     buildTypes {
         release {
-            minifyEnabled true
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             debuggable false
             signingConfig signingConfigs.releaseConfig
@@ -66,7 +63,9 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'org.apache.commons:commons-compress:1.14'
     compile 'org.samba.jcifs:jcifs:1.3.3'
-    compile 'com.android.support:support-core-utils:25.3.1'
+    compile 'com.jcraft:jsch:0.1.54'
+    compile 'commons-net:commons-net:3.6'
+    compile 'com.android.support:support-core-utils:25.4.0'
     compile 'net.hockeyapp.android:HockeySDK:5.0.0'
     testCompile 'junit:junit:4.12'
 }
