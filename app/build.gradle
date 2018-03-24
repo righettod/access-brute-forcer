@@ -26,6 +26,7 @@ android {
         }
     }
     compileSdkVersion 25
+    buildToolsVersion "26.0.2"
     defaultConfig {
         applicationId "righettod.eu.accessbf"
         minSdkVersion 24
