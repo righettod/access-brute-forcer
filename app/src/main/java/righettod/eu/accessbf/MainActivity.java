@@ -44,8 +44,17 @@ import java.util.List;
  */
 public class MainActivity extends Activity implements AdapterView.OnItemSelectedListener {
 
+    /**
+     * TAG for log identification
+     */
     public static final String LOG_TAG = "ACCESSBF";
+
+    /**
+     * Code to identify request to the Storage Access Framework
+     */
     private static final int READ_DOCUMENT_REQUEST_CODE = 1;
+
+
     private String selectedPasswordDictionary = null;
     private File selectedPasswordDictionaryFilePath = null;
     private File dictionariesStorageFolder = null;
@@ -59,29 +68,29 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 
-        //Check if WIFI is enabled => Mandatory
-        WifiManager wifi = (WifiManager) getSystemService(WIFI_SERVICE);
-        if (!wifi.isWifiEnabled()) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("WIFI is not enabled, application will be closed !").setTitle("Warning").setPositiveButton("OK", (DialogInterface dialog, int id) -> {
-                        MainActivity.this.finish();
-                    }
-            );
-            AlertDialog dialog = builder.create();
-            dialog.show();
-        }
-
-        //Ensure that the user have the authorization of the network owner before to use the application
+        //Ensure that the user have the authorization of the network owner before to use the application and the WIFI is enabled
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setMessage("Do you have an explicit authorization of the network owner to perform this brute force operation ?").setTitle("Legal Warning").setPositiveButton("Yes", (DialogInterface dialog, int id) -> {
+                    //Check if WIFI is enabled => Mandatory
+                    WifiManager wifi = (WifiManager) getSystemService(WIFI_SERVICE);
+                    if (!wifi.isWifiEnabled()) {
+                        AlertDialog.Builder builder2 = new AlertDialog.Builder(this);
+                        builder2.setMessage("WIFI is not enabled, application will be closed !").setTitle("Warning").setPositiveButton("OK", (DialogInterface dialog2, int id2) -> {
+                                    MainActivity.this.finishAndRemoveTask();
+                                }
+                        );
+                        AlertDialog dialog2 = builder2.create();
+                        dialog2.show();
+                    }
                 }
-        ).setNegativeButton("No", (DialogInterface dialog, int id) -> MainActivity.this.finish());
+        ).setNegativeButton("No", (DialogInterface dialog, int id) -> MainActivity.this.finishAndRemoveTask()
+        );
         AlertDialog dialog = builder.create();
         dialog.show();
 
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         //Init the storage location of the dictionaries
         this.dictionariesStorageFolder = new File(getApplicationContext().getFilesDir(), "dictionaries");
         if (!this.dictionariesStorageFolder.exists()) {
@@ -107,7 +116,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
         final Button buttonDownloadDico = (Button) findViewById(R.id.buttonDownloadDico);
         buttonDownloadDico.setOnClickListener((View v) -> {
                     //Retrieve the dico download URL from string resources if it is not a LocalCustom dico
-                    if ("Local...".equalsIgnoreCase(MainActivity.this.selectedPasswordDictionary)) {
+                    if ("Local...".equalsIgnoreCase(MainActivity.this.selectedPasswordDictionary) || "CustomDict".equalsIgnoreCase(MainActivity.this.selectedPasswordDictionary)) {
                         //See https://developer.android.com/guide/topics/providers/document-provider.html
                         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
                         // Filter to only show results that can be "opened", such as a file (as opposed to a list of contacts or timezones)
@@ -190,57 +199,57 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
 
         //Add start BF button event handler
         final Button buttonStart = (Button) findViewById(R.id.buttonStart);
-        buttonStart.setOnClickListener((View v) ->{
-                try {
-                    //Check that a password dictionary is selected
-                    if (MainActivity.this.selectedPasswordDictionaryFilePath == null || !MainActivity.this.selectedPasswordDictionaryFilePath.exists()) {
-                        NotificationUtil.showMessageDialog(MainActivity.this, "A dictionary must be selected !", "Warning");
-                        return;
-                    }
-                    //Check that a target is specified
-                    CharSequence target = ((TextView) findViewById(R.id.editIPPort)).getText();
-                    if (target == null || target.toString().trim().isEmpty()) {
-                        NotificationUtil.showMessageDialog(MainActivity.this, "A target must be specified !", "Warning");
-                        return;
-                    }
-                    //Check that a login is specified
-                    CharSequence login = ((TextView) findViewById(R.id.editUsername)).getText();
-                    if (login == null || login.toString().trim().isEmpty()) {
-                        NotificationUtil.showMessageDialog(MainActivity.this, "A login must be specified !", "Warning");
-                        return;
+        buttonStart.setOnClickListener((View v) -> {
+                    try {
+                        //Check that a password dictionary is selected
+                        if (MainActivity.this.selectedPasswordDictionaryFilePath == null || !MainActivity.this.selectedPasswordDictionaryFilePath.exists()) {
+                            NotificationUtil.showMessageDialog(MainActivity.this, "A dictionary must be selected !", "Warning");
+                            return;
+                        }
+                        //Check that a target is specified
+                        CharSequence target = ((TextView) findViewById(R.id.editIPPort)).getText();
+                        if (target == null || target.toString().trim().isEmpty()) {
+                            NotificationUtil.showMessageDialog(MainActivity.this, "A target must be specified !", "Warning");
+                            return;
+                        }
+                        //Check that a login is specified
+                        CharSequence login = ((TextView) findViewById(R.id.editUsername)).getText();
+                        if (login == null || login.toString().trim().isEmpty()) {
+                            NotificationUtil.showMessageDialog(MainActivity.this, "A login must be specified !", "Warning");
+                            return;
+                        }
+
+                        //Load the dictionary's password entries
+                        List<String> dictionaryEntries = MainActivity.this.loadDictionary(MainActivity.this.selectedPasswordDictionaryFilePath);
+
+                        //Create and launch tasks
+                        TextView textProgressInfo = (TextView) findViewById(R.id.textProgressInfo);
+                        TextView textResult = (TextView) findViewById(R.id.textResult);
+                        CredentialProbingTask task = new CredentialProbingTask(MainActivity.this.selectedProtocol, textProgressInfo, textResult, findViewById(R.id.dicoSpinner), findViewById(R.id.buttonDownloadDico), findViewById(R.id.buttonStart), findViewById(R.id.editIPPort), findViewById(R.id.editUsername), findViewById(R.id.bf_ftp), findViewById(R.id.bf_smb), findViewById(R.id.bf_ssh));
+                        Object[] params = new Object[]{target.toString(), login.toString(), dictionaryEntries};
+                        MainActivity.this.credentialProbingTaskList.clear();
+                        MainActivity.this.credentialProbingTaskList.add(task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params));
+                        textProgressInfo.setText("Brute force started...");
+                    } catch (Exception e) {
+                        NotificationUtil.showMessageDialog(MainActivity.this, "Error during brute force operation:" + e.getMessage(), "Error");
                     }
 
-                    //Load the dictionary's password entries
-                    List<String> dictionaryEntries = MainActivity.this.loadDictionary(MainActivity.this.selectedPasswordDictionaryFilePath);
-
-                    //Create and launch tasks
-                    TextView textProgressInfo = (TextView) findViewById(R.id.textProgressInfo);
-                    TextView textResult = (TextView) findViewById(R.id.textResult);
-                    CredentialProbingTask task = new CredentialProbingTask(MainActivity.this.selectedProtocol, textProgressInfo, textResult, findViewById(R.id.dicoSpinner), findViewById(R.id.buttonDownloadDico), findViewById(R.id.buttonStart), findViewById(R.id.editIPPort), findViewById(R.id.editUsername), findViewById(R.id.bf_ftp), findViewById(R.id.bf_smb), findViewById(R.id.bf_ssh));
-                    Object[] params = new Object[]{target.toString(), login.toString(), dictionaryEntries};
-                    MainActivity.this.credentialProbingTaskList.clear();
-                    MainActivity.this.credentialProbingTaskList.add(task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, params));
-                    textProgressInfo.setText("Brute force started...");
-                } catch (Exception e) {
-                    NotificationUtil.showMessageDialog(MainActivity.this, "Error during brute force operation:" + e.getMessage(), "Error");
                 }
-
-            }
         );
 
         //Handle action to copy result on clipboard when result text view is pressed
         final TextView resultTextView = (TextView) findViewById(R.id.textResult);
         resultTextView.setMovementMethod(new ScrollingMovementMethod());
-        resultTextView.setOnTouchListener((View v, MotionEvent event) ->{
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-                    ClipData clip = ClipData.newPlainText("BF Result", resultTextView.getText());
-                    clipboard.setPrimaryClip(clip);
-                    Toast toast = Toast.makeText(getApplicationContext(), "Brute force result copied into clipboard !", Toast.LENGTH_SHORT);
-                    toast.show();
+        resultTextView.setOnTouchListener((View v, MotionEvent event) -> {
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        ClipboardManager clipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+                        ClipData clip = ClipData.newPlainText("BF Result", resultTextView.getText());
+                        clipboard.setPrimaryClip(clip);
+                        Toast toast = Toast.makeText(getApplicationContext(), "Brute force result copied into clipboard !", Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                    return false;
                 }
-                return false;
-            }
         );
 
         //HockeyApp crash handler
@@ -290,7 +299,8 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
                 TextView textProgressInfo = (TextView) findViewById(R.id.textProgressInfo);
                 try {
                     this.copyFile(resultData.getData(), this.selectedPasswordDictionaryFilePath);
-                    textProgressInfo.setText("Dictionary loaded (" + this.loadDictionary(this.selectedPasswordDictionaryFilePath).size() + " passwords)");
+                    int dictSize = this.loadDictionary(this.selectedPasswordDictionaryFilePath).size();
+                    textProgressInfo.setText("Dictionary loaded (" + dictSize + " passwords)");
                     findViewById(R.id.buttonStart).setEnabled(true);
                     findViewById(R.id.buttonStop).setEnabled(true);
                 } catch (IOException ioe) {
