@@ -25,6 +25,14 @@ Last release:
 * [APK file](https://rink.hockeyapp.net/apps/64dd8a3981644cfd9923617dc0d05989)
 * [VirusTotal APK file analysis](https://www.virustotal.com/#/file/6ff09f75a4642ebcb50d0b16bba3964168345009718cb8a53f8573173de72a65/detection)
 
+# Working version enhancement
+
+Version: **1.2**
+
+* Fix the bug on the protocol selected by default that do not match the selected one at code level (SSH selected in code but FTP selected in UI).
+* Add notification about attack progress during brute force operation and at the end whatever the brute force result.
+* Update notification to support notification on wear (smartwatch in my test case).
+
 # Build command line
 
 ## Debug version

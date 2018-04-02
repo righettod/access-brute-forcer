@@ -58,7 +58,7 @@ public class MainActivity extends Activity implements AdapterView.OnItemSelected
     private String selectedPasswordDictionary = null;
     private File selectedPasswordDictionaryFilePath = null;
     private File dictionariesStorageFolder = null;
-    private Protocol selectedProtocol = Protocol.SSH;
+    private Protocol selectedProtocol = Protocol.FTP;
     private final List<AsyncTask<Object, Integer[], List<String>>> credentialProbingTaskList = new ArrayList<>();
 
     /**

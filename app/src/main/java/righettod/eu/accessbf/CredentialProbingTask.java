@@ -36,12 +36,15 @@ class CredentialProbingTask extends AsyncTask<Object, Integer[], List<String>> {
     private View[] actionViews = null;
 
 
-    /**Protocol Protocol to use for the credential probing*/
+    /**
+     * Protocol Protocol to use for the credential probing
+     */
     private Protocol protocol = null;
 
     /**
      * Constructor
-     * @param protocol Protocol to use for the credential probing
+     *
+     * @param protocol         Protocol to use for the credential probing
      * @param textProgressInfo UI component to update to provide text feedback
      * @param textResult       UI component to update to provide text feedback about result
      * @param actionViews      List of action view to disable and re-enable during and after the processing
@@ -86,15 +89,15 @@ class CredentialProbingTask extends AsyncTask<Object, Integer[], List<String>> {
 
             //Test the password list
             int passwordsCount = passwords.size();
-            final ProtocolUtil protocolUtil = new ProtocolUtil(target,login);
+            final ProtocolUtil protocolUtil = new ProtocolUtil(target, login);
             final CopyOnWriteArrayList<Integer> tryCountHolder = new CopyOnWriteArrayList<>();
             tryCountHolder.add(0);
             passwords.parallelStream().forEach(password -> {
                 try {
                     //Apply effective probing only if password has not already been found and task has not been cancelled
-                    if(validCreds.isEmpty() && !this.isCancelled()){
+                    if (validCreds.isEmpty() && !this.isCancelled()) {
                         boolean isValidPassword;
-                        switch(this.protocol){
+                        switch (this.protocol) {
                             case SMB:
                                 isValidPassword = protocolUtil.isValidPasswordForSMB(password);
                                 break;
@@ -139,6 +142,11 @@ class CredentialProbingTask extends AsyncTask<Object, Integer[], List<String>> {
         String msg = "Passwords dictionary tested at " + progressPercentage + "% (" + passwordTotalCount + " entries to test) ...";
         if (!msg.equalsIgnoreCase(this.textProgressInfo.getText().toString())) {
             this.textProgressInfo.setText(msg);
+            //If progress percentage is at round unit % (10,20,30...) then send a notification
+            if ((progressPercentage % 10) == 0) {
+                String notifMsg = "Brute force achieved at " + progressPercentage + "%";
+                NotificationUtil.sendNotification(this.textResult.getContext(), notifMsg);
+            }
         }
     }
 
@@ -163,6 +171,8 @@ class CredentialProbingTask extends AsyncTask<Object, Integer[], List<String>> {
         } else {
             msgInfo = "<font color='red'>No valid credential found !</font>";
             this.textResult.setText("");
+            //Send a notification that brute force has failed
+            NotificationUtil.sendNotification(this.textResult.getContext(), "No valid credential found !");
         }
         //Display the final result state info
         this.textProgressInfo.setText(Html.fromHtml(msgInfo, Html.FROM_HTML_MODE_LEGACY));
