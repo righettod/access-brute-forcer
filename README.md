@@ -23,15 +23,16 @@ HockeyApp system is used to publish releases and track the applications crashes.
 
 Last release:
 * [APK file](https://rink.hockeyapp.net/apps/64dd8a3981644cfd9923617dc0d05989)
-* [VirusTotal APK file analysis](https://www.virustotal.com/#/file/6ff09f75a4642ebcb50d0b16bba3964168345009718cb8a53f8573173de72a65/detection)
+
+APK release file analysis report:
+* [VirusTotal](https://www.virustotal.com/#/file/24327a5d2aee981cf90e5f21dca4377cc93bff9cbd7bf08cdd74c3ffae38ac61/detection)
+* [HybridAnalysis](https://www.hybrid-analysis.com/sample/24327a5d2aee981cf90e5f21dca4377cc93bff9cbd7bf08cdd74c3ffae38ac61)
 
 # Working version enhancement
 
-Version: **1.2**
+Version: **1.3**
 
-* Fix the bug on the protocol selected by default that do not match the selected one at code level (SSH selected in code but FTP selected in UI).
-* Add notification about attack progress during brute force operation and at the end whatever the brute force result.
-* Update notification to support notification on wear (smartwatch in my test case).
+* Nothing in the pipe for the moment...
 
 # Build command line
 
