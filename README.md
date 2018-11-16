@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/righettod/access-brute-forcer.svg)](https://travis-ci.org/righettod/access-brute-forcer)
+[![Build Status Travis](https://travis-ci.org/righettod/access-brute-forcer.svg)](https://travis-ci.org/righettod/access-brute-forcer)
+![Build Status AppCenter](https://build.appcenter.ms/v0.1/apps/543636ef-e49f-4da7-a1a2-30a44f21c74b/branches/master/badge)
 
 # Access Brute Forcer
 
