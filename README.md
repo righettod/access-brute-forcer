@@ -23,7 +23,7 @@ The application allow to download and keep password dictionaries from predefined
 HockeyApp system is used to publish releases and track the applications crashes.
 
 Last release:
-* [APK file](https://rink.hockeyapp.net/apps/64dd8a3981644cfd9923617dc0d05989)
+* [APK file](https://install.appcenter.ms/users/dominique.righetto/apps/access-brute-forcer/distribution_groups/all-users-of-access-brute-forcer)
 
 APK release file analysis report:
 * [VirusTotal](https://www.virustotal.com/#/file/24327a5d2aee981cf90e5f21dca4377cc93bff9cbd7bf08cdd74c3ffae38ac61/detection)
